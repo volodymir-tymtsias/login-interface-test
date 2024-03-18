@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const BASE_URL = 'https://auth-qa.qencode.com/v1/auth/';
+const BASE_URL = 'https://auth-qa.qencode.com/v1/auth';
 
 // a promise resolved after a given delay
 function wait(delay: number) {

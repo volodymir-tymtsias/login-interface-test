@@ -1,59 +1,68 @@
 /* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { loginUser } from '../api/user';
+import { DataFetchUser } from '../types/DataFetchUser';
 
 type UserState = {
-  email: string;
-  password: string;
   accessToken: string;
   refreshToken: string;
-  error: string;
-  loaded: boolean;
+  error: any[] | string | number;
+  loading: boolean;
 };
 
 const initialState: UserState = {
-  email: '',
-  password: '',
   accessToken: '',
   refreshToken: '',
   error: '',
-  loaded: false,
+  loading: false,
 };
 
 export const initUser = createAsyncThunk(
   'user/fetch',
-  () => loginUser(),
+  (data: DataFetchUser) => loginUser(data),
 );
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    clearError: (state) => {
+      state.error = '';
+    },
     logout: (state) => {
-      state.email = '';
-      state.password = '';
       state.accessToken = '';
       state.refreshToken = '';
       state.error = '';
-      state.loaded = false;
+      state.loading = false;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.setItem('isAuth', 'false');
     },
   },
   extraReducers: (builder) => {
     builder.addCase(initUser.pending, (state) => {
-      state.loaded = false;
+      state.loading = true;
     });
 
     builder.addCase(initUser.fulfilled, (state, action) => {
-            
-      state.loaded = true;
+      if (!action.payload.error) {
+        state.accessToken = action.payload.access_token;
+        state.refreshToken = action.payload.refresh_token;
+        localStorage.setItem('accessToken', action.payload.access_token);
+        localStorage.setItem('refreshToken', action.payload.refresh_token);
+        localStorage.setItem('isAuth', 'true');
+      } else {
+        state.error = action.payload.detail;
+      }
+      state.loading = false;
     });
 
     builder.addCase(initUser.rejected, (state) => {
-      state.error = 'something wrong';
-      state.loaded = true;
+      state.error = 'Something wrong';
+      state.loading = false;
     });
   },
 });
 
 export default userSlice.reducer;
-export const { logout } = userSlice.actions;
+export const { logout, clearError } = userSlice.actions;

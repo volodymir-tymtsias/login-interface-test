@@ -1,9 +1,12 @@
+import { DataFetchUser } from '../types/DataFetchUser';
+import { ResponseUser } from '../types/ResponseUser';
 import { client } from './fetchClient';
 
-export const loginUser = () => {
+export const loginUser = (data: DataFetchUser) => {
   const newData = {
-    
+    email: data.email,
+    password: data.password,
   };
 
-  return client.post('', newData);
+  return client.post<ResponseUser>('/login', newData);
 };

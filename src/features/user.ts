@@ -8,6 +8,7 @@ type UserState = {
   refreshToken: string;
   error: any[] | string | number;
   loading: boolean;
+  resetSentToMail: boolean;
 };
 
 const initialState: UserState = {
@@ -15,6 +16,7 @@ const initialState: UserState = {
   refreshToken: '',
   error: '',
   loading: false,
+  resetSentToMail: false,
 };
 
 export const initUser = createAsyncThunk(
@@ -34,6 +36,9 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = '';
     },
+    clearResetSentToMail: (state) => {
+      state.resetSentToMail = false;
+    },
     logout: (state) => {
       state.accessToken = '';
       state.refreshToken = '';
@@ -41,7 +46,6 @@ const userSlice = createSlice({
       state.loading = false;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
-      localStorage.setItem('isAuth', 'false');
     },
   },
   extraReducers: (builder) => {
@@ -55,7 +59,6 @@ const userSlice = createSlice({
         state.refreshToken = action.payload.refresh_token;
         localStorage.setItem('accessToken', action.payload.access_token);
         localStorage.setItem('refreshToken', action.payload.refresh_token);
-        localStorage.setItem('isAuth', 'true');
       } else {
         state.error = action.payload.detail;
       }
@@ -73,7 +76,7 @@ const userSlice = createSlice({
 
     builder.addCase(userPasswordReset.fulfilled, (state, action) => {
       if (!action.payload.error) {
-
+        state.resetSentToMail = true;
       } else {
         state.error = action.payload.detail;
       }
@@ -88,4 +91,4 @@ const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
-export const { logout, clearError } = userSlice.actions;
+export const { logout, clearError, clearResetSentToMail } = userSlice.actions;

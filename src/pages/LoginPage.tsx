@@ -20,7 +20,7 @@ import { ReactComponent as GoogleIcon } from '../images/Google.svg';
 import { ReactComponent as GithubIcon } from '../images/Github.svg';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import { Link as RouterLink } from 'react-router-dom';
+import { Navigate, Link as RouterLink } from 'react-router-dom';
 import { FormContainer } from '../components/FormContainer';
 import { emailTemplate } from '../helpers/emailTemplate';
 import { useAppDispatch, useAppSelector, useAuth } from '../app/hooks';
@@ -97,143 +97,130 @@ export const LoginPage = () => {
     }));
   };
 
-  const onLogout = () => {
-    dispatch(userAction.logout());
-  };
-
   return (
-    <FormContainer title={isAuth ? 'You are logged in' : 'Log in to your account'}>
-      {!isAuth && (
-        <>
-          <Box
-            component="div"
-            sx={{
-              display: 'flex',
-              width: '100%',
-              gap: '16px',
-              alignItems: 'center',
-              flexGrow: 1,
-              mb: '30px',
-            }}
+    !isAuth ? (
+      <FormContainer title="Log in to your account">
+        <Box
+          component="div"
+          sx={{
+            display: 'flex',
+            width: '100%',
+            gap: '16px',
+            alignItems: 'center',
+            flexGrow: 1,
+            mb: '30px',
+          }}
+        >
+          <MyButton 
+            variant="outlined" 
+            startIcon={<SvgIcon component={GoogleIcon} inheritViewBox />}
           >
-            <MyButton 
-              variant="outlined" 
-              startIcon={<SvgIcon component={GoogleIcon} inheritViewBox />}
+            Google
+          </MyButton>
+          <MyButton 
+            variant="outlined" 
+            startIcon={<SvgIcon component={GithubIcon} inheritViewBox />}
+          >
+            Github
+          </MyButton>
+        </Box>
+
+        <Divider 
+          sx={{
+            width: '100%',
+            mb: '32px',
+            color: '#bec5cc',
+            fontSize: '12px',
+            fontFamily: 'BasisGrotesquePro, Arial',
+            fontWeight: 500,
+          }}>OR</Divider>
+
+        <Box component="div" sx={{ width: '100%', mb: `${showFieldPassword ? '25px' : '30px'}` }}>
+          <EmailInput form={form} onChange={onChange} />
+        </Box>
+
+        {!!showFieldPassword && (
+          <>
+            <FormControl 
+              sx={{ width: '100%', mb: '15px' }} 
+              variant="outlined"
+              error={form.passwordHasError}
             >
-              Google
-            </MyButton>
-            <MyButton 
-              variant="outlined" 
-              startIcon={<SvgIcon component={GithubIcon} inheritViewBox />}
-            >
-              Github
-            </MyButton>
-          </Box>
+              <OutlinedInput
+                type={showPassword ? 'text' : 'password'}
+                size="small"
+                placeholder="Password"
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                label=""
+                value={form.password}
+                onChange={onChange('password')}
+              />
+              {form.passwordHasError && (
+                <FormHelperText>
+                  The password field should be at least 8 characters long.
+                </FormHelperText>
+              )}
+            </FormControl>
 
-          <Divider 
-            sx={{
-              width: '100%',
-              mb: '32px',
-              color: '#bec5cc',
-              fontSize: '12px',
-              fontFamily: 'BasisGrotesquePro, Arial',
-              fontWeight: 500,
-            }}>OR</Divider>
-
-          <Box component="div" sx={{ width: '100%', mb: `${showFieldPassword ? '25px' : '30px'}` }}>
-            <EmailInput form={form} onChange={onChange} />
-          </Box>
-
-          {!!showFieldPassword && (
-            <>
-              <FormControl 
-                sx={{ width: '100%', mb: '15px' }} 
-                variant="outlined"
-                error={form.passwordHasError}
-              >
-                <OutlinedInput
-                  type={showPassword ? 'text' : 'password'}
-                  size="small"
-                  placeholder="Password"
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                  label=""
-                  value={form.password}
-                  onChange={onChange('password')}
-                />
-                {form.passwordHasError && (
-                  <FormHelperText>
-                    The password field should be at least 8 characters long.
-                  </FormHelperText>
-                )}
-              </FormControl>
-
-              <Link 
-                component={RouterLink}
-                to="forgot-password"
-                underline="none"
-                sx={{ alignSelf: 'end', mb: '30px'}}
-              >
-                Forgot your password?
-              </Link>
-            </>
-          )}
-
-          {!!error && (
-            <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
-              {(typeof(error) === 'string') ? error : 'Something wrong'}
-            </Alert>
-          )}
-
-          <Button 
-            variant="contained" 
-            sx={{ mb: '20px'}}
-            onClick={onLogin}
-          >
-            {loading 
-              ? <CircularProgress color="inherit" sx={{ m: '25px' }}/>
-              : 'Log in to Qencode' 
-            }
-          </Button>
-
-          <Box 
-            component="div" 
-            sx={{ 
-              display: 'flex', 
-              gap: '5px',
-              alignItems: 'center',
-              flexDirection: { xs: 'column', sm: 'row' },
-            }}
-          >
-            <Typography variant="body1">Is your company new to Qencode?</Typography>
             <Link 
               component={RouterLink}
-              to="#"
+              to="/forgot-password"
               underline="none"
+              sx={{ alignSelf: 'end', mb: '30px'}}
             >
-              Sign up
+              Forgot your password?
             </Link>
-          </Box>
-        </>
-      )}
+          </>
+        )}
 
-      {isAuth && (<Button 
-        variant="contained" 
-        sx={{ mb: '20px'}}
-        onClick={onLogout}
-      >
-        Log out
-      </Button>)}
-    </FormContainer>
+        {!!error && (
+          <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+            {(typeof(error) === 'string') ? error : 'Something wrong'}
+          </Alert>
+        )}
+
+        <Button 
+          variant="contained" 
+          sx={{ mb: '20px'}}
+          onClick={onLogin}
+        >
+          {loading 
+            ? <CircularProgress color="inherit" sx={{ m: '25px' }}/>
+            : 'Log in to Qencode' 
+          }
+        </Button>
+
+        <Box 
+          component="div" 
+          sx={{ 
+            display: 'flex', 
+            gap: '5px',
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+          }}
+        >
+          <Typography variant="body1">Is your company new to Qencode?</Typography>
+          <Link 
+            component={RouterLink}
+            to="#"
+            underline="none"
+          >
+            Sign up
+          </Link>
+        </Box>
+      </FormContainer>
+    )
+      : <Navigate to="/" />
   );
 };

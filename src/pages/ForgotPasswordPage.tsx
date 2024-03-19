@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Box, Button } from '@mui/material';
+import { Alert, Box, Button, CircularProgress } from '@mui/material';
 import styled from '@emotion/styled';
 import { FormContainer } from '../components/FormContainer';
 import { emailTemplate } from '../helpers/emailTemplate';
 import {useNavigate } from 'react-router-dom';
 import { EmailInput } from '../components/EmailInput';
 import { FormForgotPassword } from '../types/FormsTypes';
-import { useAppDispatch } from '../app/hooks';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
 import * as userAction from '../features/user';
 
 const MyButton = styled(Button)({
@@ -17,6 +17,7 @@ const MyButton = styled(Button)({
 
 export const ForgotPasswordPage = () => {
   const dispatch = useAppDispatch();
+  const { loading, resetSentToMail, error } = useAppSelector(state => state.user);
   const navigate = useNavigate();
   const [form, setForm] = useState<FormForgotPassword>({
     email: '',
@@ -33,7 +34,7 @@ export const ForgotPasswordPage = () => {
   };
 
   const onSend = () => {
-    if(!emailTemplate.test(form.email)) {
+    if(!emailTemplate.test(form.email) || form.email.length < 15) {
       setForm({
         ...form,
         emailHasError: true,
@@ -42,26 +43,61 @@ export const ForgotPasswordPage = () => {
       return;
     }
 
+    dispatch(userAction.userPasswordReset(form.email));
+  };
+  
+  const onSimulate = () => {
+    dispatch(userAction.clearResetSentToMail());
     navigate('/reset-password/test-test-test?secret=secret');
   };
 
   const onCancel = () => {
+    dispatch(userAction.clearError());
+    dispatch(userAction.clearResetSentToMail());
     navigate(-1);
   };
 
   return (
     <FormContainer title="Forgot Password?">
-      <Box component="div" sx={{ width: '100%', mb: '25px' }}>
-        <EmailInput form={form} onChange={onChange} />
-      </Box>
-      
-      <Button 
-        variant="contained" 
-        sx={{ mb: '20px'}}
-        onClick={onSend}
-      >
-        Send
-      </Button>
+      {!resetSentToMail && (
+        <>
+          <Box component="div" sx={{ width: '100%', mb: '25px' }}>
+            <EmailInput form={form} onChange={onChange} />
+          </Box>
+
+          {!!error && (
+            <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+              {(typeof(error) === 'string') ? error : 'Something wrong'}
+            </Alert>
+          )}
+          
+          <Button 
+            variant="contained" 
+            sx={{ mb: '20px'}}
+            onClick={onSend}
+          >
+            {loading 
+              ? <CircularProgress color="inherit" sx={{ m: '25px' }}/>
+              : 'Send' 
+            }
+          </Button>
+        </>
+      )}
+
+      {resetSentToMail && (
+        <>
+          <Alert severity="success" sx={{ width: '100%', mb: '15px' }}>
+            {`Please check your email ${form.email} to complete the password reset process.`}
+          </Alert>
+          <Button 
+            variant="contained" 
+            sx={{ mb: '20px'}}
+            onClick={onSimulate}
+          >
+            Simulate the transition from mail
+          </Button>
+        </>
+      )}
 
       <MyButton variant="outlined" onClick={onCancel}>
         Cancel

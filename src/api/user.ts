@@ -1,12 +1,16 @@
 import { DataFetchUser } from '../types/DataFetchUser';
-import { ResponseUser } from '../types/ResponseUser';
+import { ResponseResetPassword, ResponseUser } from '../types/ResponseUser';
 import { client } from './fetchClient';
 
 export const loginUser = (data: DataFetchUser) => {
-  const newData = {
-    email: data.email,
-    password: data.password,
+  return client.post<ResponseUser>('/login', data);
+};
+
+export const passwordReset = (email: string) => {
+  const data = {
+    email,
+    redirect_url: `${window.location.origin}/#/reset-password`,
   };
 
-  return client.post<ResponseUser>('/login', newData);
+  return client.post<ResponseResetPassword>('/password-reset', data);
 };

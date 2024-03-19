@@ -25,6 +25,8 @@ import { FormContainer } from '../components/FormContainer';
 import { emailTemplate } from '../helpers/emailTemplate';
 import { useAppDispatch, useAppSelector, useAuth } from '../app/hooks';
 import * as userAction from '../features/user';
+import { EmailInput } from '../components/EmailInput';
+import { FormLogin } from '../types/FormsTypes';
 
 const MyButton = styled(Button)({
   fontSize: 14,
@@ -36,17 +38,10 @@ const MyButton = styled(Button)({
   borderColor: '#d3d8dc',
 });
 
-type TForm = {
-  email: string;
-  password: string;
-  emailHasError: boolean;
-  passwordHasError: boolean;
-};
-
 export const LoginPage = () => {
   const dispatch = useAppDispatch();
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormLogin>({
     email: '',
     password: '',
     emailHasError: false,
@@ -60,14 +55,15 @@ export const LoginPage = () => {
     event.preventDefault();
   };
 
-  const onChange = (fieldName: keyof TForm) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    dispatch(userAction.clearError());
-    setForm({
-      ...form,
-      [fieldName]: event.target.value,
-      [`${fieldName}HasError`]: false,
-    });
-  };
+  const onChange = (fieldName: keyof FormLogin) => 
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      dispatch(userAction.clearError());
+      setForm({
+        ...form,
+        [fieldName]: event.target.value,
+        [`${fieldName}HasError`]: false,
+      });
+    };
 
   const showFieldPassword = form.email.length;
   const isAuth = useAuth().isAuth;
@@ -143,26 +139,10 @@ export const LoginPage = () => {
               fontFamily: 'BasisGrotesquePro, Arial',
               fontWeight: 500,
             }}>OR</Divider>
-          
-          <FormControl 
-            sx={{ width: '100%', mb: `${showFieldPassword ? '25px' : '30px'}` }} 
-            variant="outlined"
-            error={form.emailHasError}
-          >
-            <OutlinedInput
-              type="email"
-              size="small"
-              placeholder="Work email"
-              label=""
-              value={form.email}
-              onChange={onChange('email')}
-            />
-            {form.emailHasError && (
-              <FormHelperText>
-                The e-mail must be in a valid format and contain at least 15 characters.
-              </FormHelperText>
-            )}
-          </FormControl>
+
+          <Box component="div" sx={{ width: '100%', mb: `${showFieldPassword ? '25px' : '30px'}` }}>
+            <EmailInput form={form} onChange={onChange} />
+          </Box>
 
           {!!showFieldPassword && (
             <>

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { loginUser } from '../api/user';
+import { loginUser, passwordReset } from '../api/user';
 import { DataFetchUser } from '../types/DataFetchUser';
 
 type UserState = {
@@ -18,8 +18,13 @@ const initialState: UserState = {
 };
 
 export const initUser = createAsyncThunk(
-  'user/fetch',
+  'user/login',
   (data: DataFetchUser) => loginUser(data),
+);
+
+export const userPasswordReset = createAsyncThunk(
+  'user/reset-password',
+  (data: string) => passwordReset(data),
 );
 
 const userSlice = createSlice({
@@ -58,6 +63,24 @@ const userSlice = createSlice({
     });
 
     builder.addCase(initUser.rejected, (state) => {
+      state.error = 'Something wrong';
+      state.loading = false;
+    });
+
+    builder.addCase(userPasswordReset.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(userPasswordReset.fulfilled, (state, action) => {
+      if (!action.payload.error) {
+
+      } else {
+        state.error = action.payload.detail;
+      }
+      state.loading = false;
+    });
+
+    builder.addCase(userPasswordReset.rejected, (state) => {
       state.error = 'Something wrong';
       state.loading = false;
     });

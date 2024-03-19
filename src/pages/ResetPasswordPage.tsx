@@ -12,6 +12,8 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import styled from '@emotion/styled';
 import { FormContainer } from '../components/FormContainer';
+import { FormResetPassword } from '../types/FormsTypes';
+import { useSearchParams } from 'react-router-dom';
 
 const MyPasswordInput = styled(OutlinedInput)({
   'label + &': {
@@ -26,14 +28,9 @@ const InputPasswordLabel = styled(InputLabel)({
   lineHeight: '21px',
 });
 
-type TForm = {
-  password: string;
-  confirmPassword: string;
-  passwordHasError: boolean;
-  confirmPasswordHasError: boolean;
-};
-
 export const ResetPasswordPage = () => {
+  const [searchParams] = useSearchParams();
+  const secret = searchParams.get('secret') || '';
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     password: '',
@@ -48,13 +45,14 @@ export const ResetPasswordPage = () => {
     event.preventDefault();
   };
 
-  const onChange = (fieldName: keyof TForm) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({
-      ...form,
-      [fieldName]: event.target.value,
-      [`${fieldName}HasError`]: false,
-    });
-  };
+  const onChange = (fieldName: keyof FormResetPassword) => 
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm({
+        ...form,
+        [fieldName]: event.target.value,
+        [`${fieldName}HasError`]: false,
+      });
+    };
 
   const onReset = () => {
     let passwordHasError = false;

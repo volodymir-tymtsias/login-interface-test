@@ -7,3 +7,5 @@ export interface ResponseUser {
   token_expire: number;
   refresh_token_expire: number;
 }
+
+export type ResponseResetPassword = Pick<ResponseUser, 'error' | 'detail' | 'timestamp'>;

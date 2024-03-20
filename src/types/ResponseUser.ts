@@ -1,6 +1,13 @@
+export type DetailError = {
+  field_name: string;
+  error: string;
+};
+
+export type Detail = string | number | DetailError[];
+
 export interface ResponseUser {
   error: number;
-  detail: any[] | string | number;
+  detail: Detail;
   timestamp: number;
   access_token: string;
   refresh_token: string;

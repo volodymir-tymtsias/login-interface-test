@@ -1,3 +1,4 @@
+import { DataFetchNewPassword } from '../types/DataFetchNewPassword';
 import { DataFetchUser } from '../types/DataFetchUser';
 import { ResponseResetPassword, ResponseUser } from '../types/ResponseUser';
 import { client } from './fetchClient';
@@ -13,4 +14,8 @@ export const passwordReset = (email: string) => {
   };
 
   return client.post<ResponseResetPassword>('/password-reset', data);
+};
+
+export const setNewPassword = (data: DataFetchNewPassword) => {
+  return client.post<ResponseResetPassword>('/password-set', data);
 };

@@ -27,6 +27,7 @@ import { useAppDispatch, useAppSelector, useAuth } from '../app/hooks';
 import * as userAction from '../features/user';
 import { EmailInput } from '../components/EmailInput';
 import { FormLogin } from '../types/FormsTypes';
+import { getErrorMessage } from '../helpers/getError';
 
 const MyButton = styled(Button)({
   fontSize: 14,
@@ -186,7 +187,7 @@ export const LoginPage = () => {
 
         {!!error && (
           <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
-            {(typeof(error) === 'string') ? error : 'Something wrong'}
+            {getErrorMessage(error)}
           </Alert>
         )}
 
@@ -196,7 +197,7 @@ export const LoginPage = () => {
           onClick={onLogin}
         >
           {loading 
-            ? <CircularProgress color="inherit" sx={{ m: '25px' }}/>
+            ? <CircularProgress color="inherit"/>
             : 'Log in to Qencode' 
           }
         </Button>

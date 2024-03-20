@@ -8,6 +8,7 @@ import { EmailInput } from '../components/EmailInput';
 import { FormForgotPassword } from '../types/FormsTypes';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import * as userAction from '../features/user';
+import { getErrorMessage } from '../helpers/getError';
 
 const MyButton = styled(Button)({
   color: '#060e1e',
@@ -47,13 +48,14 @@ export const ForgotPasswordPage = () => {
   };
   
   const onSimulate = () => {
-    dispatch(userAction.clearResetSentToMail());
-    navigate('/reset-password/test-test-test?secret=secret');
+    dispatch(userAction.deleteResetSentToMail());
+    dispatch(userAction.deleteNewPasswordHasBeenSet());
+    navigate('/reset-password/testToken-test-test');
   };
 
   const onCancel = () => {
     dispatch(userAction.clearError());
-    dispatch(userAction.clearResetSentToMail());
+    dispatch(userAction.deleteResetSentToMail());
     navigate(-1);
   };
 
@@ -67,7 +69,7 @@ export const ForgotPasswordPage = () => {
 
           {!!error && (
             <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
-              {(typeof(error) === 'string') ? error : 'Something wrong'}
+              {getErrorMessage(error)}
             </Alert>
           )}
           
@@ -77,7 +79,7 @@ export const ForgotPasswordPage = () => {
             onClick={onSend}
           >
             {loading 
-              ? <CircularProgress color="inherit" sx={{ m: '25px' }}/>
+              ? <CircularProgress color="inherit"/>
               : 'Send' 
             }
           </Button>

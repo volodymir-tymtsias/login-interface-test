@@ -1,14 +1,17 @@
 /* eslint-disable no-param-reassign */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { loginUser, passwordReset } from '../api/user';
+import { loginUser, passwordReset, setNewPassword } from '../api/user';
 import { DataFetchUser } from '../types/DataFetchUser';
+import { DataFetchNewPassword } from '../types/DataFetchNewPassword';
+import { Detail } from '../types/ResponseUser';
 
 type UserState = {
   accessToken: string;
   refreshToken: string;
-  error: any[] | string | number;
+  error: Detail;
   loading: boolean;
   resetSentToMail: boolean;
+  newPasswordHasBeenSet: boolean;
 };
 
 const initialState: UserState = {
@@ -17,6 +20,7 @@ const initialState: UserState = {
   error: '',
   loading: false,
   resetSentToMail: false,
+  newPasswordHasBeenSet: false,
 };
 
 export const initUser = createAsyncThunk(
@@ -29,6 +33,11 @@ export const userPasswordReset = createAsyncThunk(
   (data: string) => passwordReset(data),
 );
 
+export const userSetNewPassword = createAsyncThunk(
+  'user/set-new-password',
+  (data: DataFetchNewPassword) => setNewPassword(data),
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -36,8 +45,11 @@ const userSlice = createSlice({
     clearError: (state) => {
       state.error = '';
     },
-    clearResetSentToMail: (state) => {
+    deleteResetSentToMail: (state) => {
       state.resetSentToMail = false;
+    },
+    deleteNewPasswordHasBeenSet: (state) => {
+      state.newPasswordHasBeenSet = false;
     },
     logout: (state) => {
       state.accessToken = '';
@@ -87,8 +99,31 @@ const userSlice = createSlice({
       state.error = 'Something wrong';
       state.loading = false;
     });
+
+    builder.addCase(userSetNewPassword.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(userSetNewPassword.fulfilled, (state, action) => {
+      if (!action.payload.error) {
+        state.newPasswordHasBeenSet = true;
+      } else {
+        state.error = action.payload.detail;
+      }
+      state.loading = false;
+    });
+
+    builder.addCase(userSetNewPassword.rejected, (state) => {
+      state.error = 'Something wrong';
+      state.loading = false;
+    });
   },
 });
 
 export default userSlice.reducer;
-export const { logout, clearError, clearResetSentToMail } = userSlice.actions;
+export const { 
+  logout, 
+  clearError, 
+  deleteResetSentToMail, 
+  deleteNewPasswordHasBeenSet,
+} = userSlice.actions;

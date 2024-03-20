@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { 
+  Alert,
   Button, 
+  CircularProgress, 
   FormControl, 
   FormHelperText, 
   IconButton, 
@@ -13,7 +15,10 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import styled from '@emotion/styled';
 import { FormContainer } from '../components/FormContainer';
 import { FormResetPassword } from '../types/FormsTypes';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import * as userAction from '../features/user';
+import { getErrorMessage } from '../helpers/getError';
 
 const MyPasswordInput = styled(OutlinedInput)({
   'label + &': {
@@ -29,9 +34,13 @@ const InputPasswordLabel = styled(InputLabel)({
 });
 
 export const ResetPasswordPage = () => {
-  const [searchParams] = useSearchParams();
-  const secret = searchParams.get('secret') || '';
+  const pathnameArr = useLocation().pathname.split('/');
+  const tokenFromLink = pathnameArr[pathnameArr.length - 1];
+  
+  const dispatch = useAppDispatch();
+  const { loading, newPasswordHasBeenSet, error } = useAppSelector(state => state.user);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     password: '',
     confirmPassword: '',
@@ -47,6 +56,7 @@ export const ResetPasswordPage = () => {
 
   const onChange = (fieldName: keyof FormResetPassword) => 
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      dispatch(userAction.clearError());
       setForm({
         ...form,
         [fieldName]: event.target.value,
@@ -55,6 +65,7 @@ export const ResetPasswordPage = () => {
     };
 
   const onReset = () => {
+    dispatch(userAction.clearError());
     let passwordHasError = false;
     let confirmPasswordHasError = false;
 
@@ -75,87 +86,131 @@ export const ResetPasswordPage = () => {
 
       return;
     }
+
+    const data = {
+      token: tokenFromLink,
+      secret: 'testSecretTest',
+      password: form.password,
+      password_confirm: form.confirmPassword,
+    };
+
+    dispatch(userAction.userSetNewPassword(data));
+  };
+
+  const onGoHome = () => {
+    dispatch(userAction.deleteResetSentToMail());
+    navigate('/');
   };
 
   return (
     <FormContainer title="Create new Password?">
-      <FormControl 
-        variant="standard" 
-        sx={{ width: '100%', mb: '25px' }}
-        error={form.passwordHasError}
-      >
-        <InputPasswordLabel shrink htmlFor="pass-input">
-          Password
-        </InputPasswordLabel>
-        <MyPasswordInput
-          id="pass-input"
-          type={showPassword ? 'text' : 'password'}
-          size="small"
-          placeholder="Password"
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label=""
-          value={form.password}
-          onChange={onChange('password')}
-        />
-        {form.passwordHasError && (
-          <FormHelperText>
-            The password field should be at least 8 characters long.
-          </FormHelperText>
-        )}
-      </FormControl>
+      {!newPasswordHasBeenSet && (
+        <>
+          <FormControl 
+            variant="standard" 
+            sx={{ width: '100%', mb: '25px' }}
+            error={form.passwordHasError}
+          >
+            <InputPasswordLabel shrink htmlFor="pass-input">
+              Password
+            </InputPasswordLabel>
+            <MyPasswordInput
+              id="pass-input"
+              type={showPassword ? 'text' : 'password'}
+              size="small"
+              placeholder="Password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label=""
+              value={form.password}
+              onChange={onChange('password')}
+            />
+            {form.passwordHasError && (
+              <FormHelperText>
+                The password field should be at least 8 characters long.
+              </FormHelperText>
+            )}
+          </FormControl>
 
-      <FormControl 
-        variant="standard" 
-        sx={{ width: '100%', mb: '25px' }}
-        error={form.confirmPasswordHasError}
-      >
-        <InputPasswordLabel shrink htmlFor="confirm-pass-input">
-          Confirm Password
-        </InputPasswordLabel>
-        <MyPasswordInput
-          id="confirm-pass-input"
-          type={showPassword ? 'text' : 'password'}
-          size="small"
-          placeholder="Password"
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                edge="end"
-              >
-                {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-              </IconButton>
-            </InputAdornment>
-          }
-          label=""
-          value={form.confirmPassword}
-          onChange={onChange('confirmPassword')}
-        />
-        {form.confirmPasswordHasError && (
-          <FormHelperText>
-            The entered passwords do not match.
-          </FormHelperText>
-        )}
-      </FormControl>
+          <FormControl 
+            variant="standard" 
+            sx={{ width: '100%', mb: '25px' }}
+            error={form.confirmPasswordHasError}
+          >
+            <InputPasswordLabel shrink htmlFor="confirm-pass-input">
+              Confirm Password
+            </InputPasswordLabel>
+            <MyPasswordInput
+              id="confirm-pass-input"
+              type={showPassword ? 'text' : 'password'}
+              size="small"
+              placeholder="Password"
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label=""
+              value={form.confirmPassword}
+              onChange={onChange('confirmPassword')}
+            />
+            {form.confirmPasswordHasError && (
+              <FormHelperText>
+                The entered passwords do not match.
+              </FormHelperText>
+            )}
+          </FormControl>
 
-      <Button 
-        variant="contained" 
-        sx={{ mb: '20px'}}
-        onClick={onReset}
-      >Reset Password</Button>
+          {!!error && (
+            <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+              {getErrorMessage(error)}
+            </Alert>
+          )}
+
+          <Button 
+            variant="contained" 
+            sx={{ mb: '20px'}}
+            onClick={onReset}
+          >
+            {loading 
+              ? <CircularProgress color="inherit"/>
+              : 'Reset Password' 
+            }
+          </Button>
+        </>
+      )}
+      
+      {newPasswordHasBeenSet && (
+        <>
+          <Alert severity="success" sx={{ width: '100%', mb: '15px' }}>
+            The new password has been set successfully
+          </Alert>
+          <Button 
+            variant="contained" 
+            sx={{ mb: '20px'}}
+            onClick={onGoHome}
+          >
+            Go Home
+          </Button>
+        </>
+      )}
     </FormContainer>
   );
 };

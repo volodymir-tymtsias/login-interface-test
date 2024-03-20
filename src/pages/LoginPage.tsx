@@ -5,12 +5,7 @@ import {
   Button, 
   CircularProgress, 
   Divider, 
-  FormControl, 
-  FormHelperText, 
-  IconButton, 
-  InputAdornment, 
   Link, 
-  OutlinedInput, 
   SvgIcon, 
   Typography, 
   styled,
@@ -18,16 +13,14 @@ import {
 
 import { ReactComponent as GoogleIcon } from '../images/Google.svg';
 import { ReactComponent as GithubIcon } from '../images/Github.svg';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import { Navigate, Link as RouterLink } from 'react-router-dom';
 import { FormContainer } from '../components/FormContainer';
 import { emailTemplate } from '../helpers/emailTemplate';
 import { useAppDispatch, useAppSelector, useAuth } from '../app/hooks';
 import * as userAction from '../features/user';
 import { EmailInput } from '../components/EmailInput';
-import { FormLogin } from '../types/FormsTypes';
 import { getErrorMessage } from '../helpers/getError';
+import { PasswordInput } from '../components/PasswordInput';
 
 const MyButton = styled(Button)({
   fontSize: 14,
@@ -41,60 +34,51 @@ const MyButton = styled(Button)({
 
 export const LoginPage = () => {
   const dispatch = useAppDispatch();
-  const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState<FormLogin>({
-    email: '',
-    password: '',
-    emailHasError: false,
-    passwordHasError: false,
-  });
+  const [email, setEmail] = useState('');
+  const [emailHasError, setEmailHasError] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordHasError, setPasswordHasError] = useState(false);
+  
   const { loading, error } = useAppSelector(state => state.user);
 
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const onChangeEmail = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    dispatch(userAction.clearError());
+    setEmail(event.target.value);
+    setEmailHasError(false);
   };
 
-  const onChange = (fieldName: keyof FormLogin) => 
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      dispatch(userAction.clearError());
-      setForm({
-        ...form,
-        [fieldName]: event.target.value,
-        [`${fieldName}HasError`]: false,
-      });
-    };
+  const onChangePassword = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    dispatch(userAction.clearError());
+    setPassword(event.target.value);
+    setPasswordHasError(false);
+  };
 
-  const showFieldPassword = form.email.length;
+  const showFieldPassword = email.length;
   const isAuth = useAuth().isAuth;
 
   const onLogin = () => {
     dispatch(userAction.clearError());
-    let passwordHasError = false;
-    let emailHasError = false;
+    let invalidPassword = false;
+    let invalidEmail = false;
 
-    if(form.password.length < 8) {
-      passwordHasError = true;
+    if(password.length < 8) {
+      invalidPassword = true;
     }
 
-    if(!emailTemplate.test(form.email) || form.email.length < 15) {
-      emailHasError = true;
+    if(!emailTemplate.test(email) || email.length < 15) {
+      invalidEmail = true;
     }
 
-    if (passwordHasError || emailHasError){
-      setForm({
-        ...form,
-        emailHasError,
-        passwordHasError,
-      });
-
+    if (invalidPassword || invalidEmail){
+      setPasswordHasError(invalidPassword);
+      setEmailHasError(invalidEmail);
+      
       return;
     }
 
     dispatch(userAction.initUser({
-      email: form.email,
-      password: form.password,
+      email,
+      password,
     }));
   };
 
@@ -137,14 +121,22 @@ export const LoginPage = () => {
           }}>OR</Divider>
 
         <Box component="div" sx={{ width: '100%', mb: `${showFieldPassword ? '25px' : '30px'}` }}>
-          <EmailInput form={form} onChange={onChange} />
+          <EmailInput value={email} onChange={onChangeEmail} error={emailHasError} />
         </Box>
 
         {!!showFieldPassword && (
           <>
-            <FormControl 
+            <PasswordInput
+              marginBottom="15px"
+              value={password}
+              onChange={onChangePassword}
+              id="password-input"
+              error={passwordHasError}
+              textError="The password field should be at least 8 characters long."
+            />
+            {/* <FormControl 
+              variant="standard"
               sx={{ width: '100%', mb: '15px' }} 
-              variant="outlined"
               error={form.passwordHasError}
             >
               <OutlinedInput
@@ -172,7 +164,7 @@ export const LoginPage = () => {
                   The password field should be at least 8 characters long.
                 </FormHelperText>
               )}
-            </FormControl>
+            </FormControl> */}
 
             <Link 
               component={RouterLink}

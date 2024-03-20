@@ -5,7 +5,6 @@ import { FormContainer } from '../components/FormContainer';
 import { emailTemplate } from '../helpers/emailTemplate';
 import {useNavigate } from 'react-router-dom';
 import { EmailInput } from '../components/EmailInput';
-import { FormForgotPassword } from '../types/FormsTypes';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import * as userAction from '../features/user';
 import { getErrorMessage } from '../helpers/getError';
@@ -20,31 +19,23 @@ export const ForgotPasswordPage = () => {
   const dispatch = useAppDispatch();
   const { loading, resetSentToMail, error } = useAppSelector(state => state.user);
   const navigate = useNavigate();
-  const [form, setForm] = useState<FormForgotPassword>({
-    email: '',
-    emailHasError: false,
-  });
-
-  const onChange = () => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [email, setEmail] = useState('');
+  const [emailHasError, setEmailHasError] = useState(false);
+  
+  const onChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     dispatch(userAction.clearError());
-    setForm({
-      ...form,
-      email: event.target.value,
-      emailHasError: false,
-    });
+    setEmail(event.target.value);
+    setEmailHasError(false);
   };
 
   const onSend = () => {
-    if(!emailTemplate.test(form.email) || form.email.length < 15) {
-      setForm({
-        ...form,
-        emailHasError: true,
-      });
+    if(!emailTemplate.test(email) || email.length < 15) {
+      setEmailHasError(true);
 
       return;
     }
 
-    dispatch(userAction.userPasswordReset(form.email));
+    dispatch(userAction.userPasswordReset(email));
   };
   
   const onSimulate = () => {
@@ -64,7 +55,7 @@ export const ForgotPasswordPage = () => {
       {!resetSentToMail && (
         <>
           <Box component="div" sx={{ width: '100%', mb: '25px' }}>
-            <EmailInput form={form} onChange={onChange} />
+            <EmailInput value={email} onChange={onChange} error={emailHasError} />
           </Box>
 
           {!!error && (
@@ -89,7 +80,7 @@ export const ForgotPasswordPage = () => {
       {resetSentToMail && (
         <>
           <Alert severity="success" sx={{ width: '100%', mb: '15px' }}>
-            {`Please check your email ${form.email} to complete the password reset process.`}
+            {`Please check your email ${email} to complete the password reset process.`}
           </Alert>
           <Button 
             variant="contained" 

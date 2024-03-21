@@ -59,7 +59,7 @@ export const ForgotPasswordPage = () => {
           </Box>
 
           {!!error && (
-            <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+            <Alert severity="error" sx={{ boxSizing: 'border-box', width: '100%', mb: '15px' }}>
               {getErrorMessage(error)}
             </Alert>
           )}
@@ -79,7 +79,7 @@ export const ForgotPasswordPage = () => {
 
       {resetSentToMail && (
         <>
-          <Alert severity="success" sx={{ width: '100%', mb: '15px' }}>
+          <Alert severity="success" sx={{ boxSizing: 'border-box', width: '100%', mb: '15px' }}>
             {`Please check your email ${email} to complete the password reset process.`}
           </Alert>
           <Button 

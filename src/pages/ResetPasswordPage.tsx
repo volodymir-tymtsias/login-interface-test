@@ -94,7 +94,7 @@ export const ResetPasswordPage = () => {
           />
 
           {!!error && (
-            <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+            <Alert severity="error" sx={{ boxSizing: 'border-box', width: '100%', mb: '15px' }}>
               {getErrorMessage(error)}
             </Alert>
           )}
@@ -114,7 +114,7 @@ export const ResetPasswordPage = () => {
       
       {newPasswordHasBeenSet && (
         <>
-          <Alert severity="success" sx={{ width: '100%', mb: '15px' }}>
+          <Alert severity="success" sx={{ boxSizing: 'border-box', width: '100%', mb: '15px' }}>
             The new password has been set successfully
           </Alert>
           <Button 

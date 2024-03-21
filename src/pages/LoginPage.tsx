@@ -134,38 +134,7 @@ export const LoginPage = () => {
               error={passwordHasError}
               textError="The password field should be at least 8 characters long."
             />
-            {/* <FormControl 
-              variant="standard"
-              sx={{ width: '100%', mb: '15px' }} 
-              error={form.passwordHasError}
-            >
-              <OutlinedInput
-                type={showPassword ? 'text' : 'password'}
-                size="small"
-                placeholder="Password"
-                endAdornment={
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                }
-                label=""
-                value={form.password}
-                onChange={onChange('password')}
-              />
-              {form.passwordHasError && (
-                <FormHelperText>
-                  The password field should be at least 8 characters long.
-                </FormHelperText>
-              )}
-            </FormControl> */}
-
+            
             <Link 
               component={RouterLink}
               to="/forgot-password"
@@ -178,7 +147,7 @@ export const LoginPage = () => {
         )}
 
         {!!error && (
-          <Alert severity="error" sx={{ width: '100%', mb: '15px' }}>
+          <Alert severity="error" sx={{ boxSizing: 'border-box', width: '100%', mb: '15px' }}>
             {getErrorMessage(error)}
           </Alert>
         )}
